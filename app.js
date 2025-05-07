@@ -53,6 +53,37 @@ const tripsApp = Vue.createApp({
     }
   },
   mounted() {
+    fetch('/.netlify/functions/fetchProducts')
+      .then(response => response.json())
+      .then(data => {
+        const assets = this.loadAssets(data.includes.Asset);
+        this.trips = data.items.map(item => ({
+          ...item.fields, 
+          ...assets[item.fields.media.sys.id]
+        }));
+      })
+      .catch(console.error);
+  },
+  methods: {
+    loadAssets(assets) {
+      const map = {};
+      assets.forEach(asset => {
+        map[asset.sys.id] = {'imageUrl': 'https:' + asset.fields.file.url,
+                             'imageAlt': asset.fields.description};
+      });
+      return map;
+    }
+  }
+});
+
+/*
+const tripsApp = Vue.createApp({
+  data() {
+    return {
+      trips: []
+    }
+  },
+  mounted() {
     const spaceId = '4zlmctjtgta7'; // Replace with your space ID
     const accessToken = 'bNzg8Yx6ojLAJHS4eDSgaC7O6728DgkKVWF5AlYgXHk'; // Replace with your access token
     const contentType = 'product';
@@ -79,7 +110,7 @@ const tripsApp = Vue.createApp({
       return map;
     }
   }
-});
+});*/
 
 /*
 const tripsApp = Vue.createApp({

@@ -2,3 +2,4 @@
 *.json
 draft.js
 assets/products/
+.env
