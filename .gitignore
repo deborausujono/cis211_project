@@ -3,3 +3,6 @@
 draft.js
 assets/products/
 .env
+
+# Local Netlify folder
+.netlify

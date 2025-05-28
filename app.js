@@ -49,7 +49,11 @@ footerApp.mount('#footer-template');
 const tripsApp = Vue.createApp({
   data() {
     return {
-      trips: []
+      trips: [],
+      maxPrice:0,
+      selectedMaxPrice: 0,
+      selectedStates: [],     // For storing selected states
+      sortOption: 'price-asc' // default
     }
   },
   mounted() {
@@ -61,6 +65,10 @@ const tripsApp = Vue.createApp({
           ...item.fields, 
           ...assets[item.fields.media.sys.id]
         }));
+
+        // Initialize maxPrice value
+        this.maxPrice = Math.max(...this.trips.map(trip => trip.price));
+        this.selectedMaxPrice = this.maxPrice;
       })
       .catch(console.error);
   },
@@ -73,65 +81,43 @@ const tripsApp = Vue.createApp({
       });
       return map;
     }
+  },
+  computed: {
+    filteredTrips() {
+      return this.trips.filter(trip => {
+        const isPriceValid = trip.price <= this.selectedMaxPrice;
+        const isStateValid = this.selectedStates.length === 0 || this.selectedStates.includes(trip.state);
+        return isPriceValid && isStateValid;
+      });
+    },
+    availableStates() {
+      const states = new Set();
+      this.trips.forEach(trip => {
+        if (trip.price <= this.selectedMaxPrice) {
+          states.add(trip.state);
+        }
+      });
+      return [...states].sort();
+    },
+    sortedTrips() {
+      const sorted = [...this.filteredTrips];
+      switch (this.sortOption) {
+        case 'price-asc':
+          sorted.sort((a, b) => a.price - b.price);
+          break;
+        case 'price-desc':
+          sorted.sort((a, b) => b.price - a.price);
+          break;
+        case 'state-asc':
+          sorted.sort((a, b) => a.state.localeCompare(b.state));
+          break;
+        case 'state-desc':
+          sorted.sort((a, b) => b.state.localeCompare(a.state));
+          break;
+      }
+      return sorted;
+    },
   }
 });
-
-/*
-const tripsApp = Vue.createApp({
-  data() {
-    return {
-      trips: []
-    }
-  },
-  mounted() {
-    const spaceId = '4zlmctjtgta7'; // Replace with your space ID
-    const accessToken = 'bNzg8Yx6ojLAJHS4eDSgaC7O6728DgkKVWF5AlYgXHk'; // Replace with your access token
-    const contentType = 'product';
-    const url = `https://cdn.contentful.com/spaces/${spaceId}/entries?access_token=${accessToken}&content_type=${contentType}`;
-
-    fetch(url)
-      .then(response => response.json())
-      .then(data => {
-        const assets = this.loadAssets(data.includes.Asset);
-        this.trips = data.items.map(item => ({
-          ...item.fields, 
-          ...assets[item.fields.media.sys.id]
-        }));
-      })
-      .catch(console.error);
-  },
-  methods: {
-    loadAssets(assets) {
-      const map = {};
-      assets.forEach(asset => {
-        map[asset.sys.id] = {'imageUrl': 'https:' + asset.fields.file.url,
-                             'imageAlt': asset.fields.description};
-      });
-      return map;
-    }
-  }
-});*/
-
-/*
-const tripsApp = Vue.createApp({
-  data() {
-    return {
-      trips: []
-    }
-  },
-  mounted() {
-    const spaceId = '4zlmctjtgta7'; // Replace with your space ID
-    const accessToken = 'bNzg8Yx6ojLAJHS4eDSgaC7O6728DgkKVWF5AlYgXHk'; // Replace with your access token
-    const contentType = 'product';
-    const url = `https://cdn.contentful.com/spaces/${spaceId}/entries?access_token=${accessToken}&content_type=${contentType}`;
-
-    fetch(url)
-      .then(response => response.json())
-      .then(data => {
-        this.trips = data.items.map(item => item.fields);
-      })
-      .catch(console.error);
-  }
-});*/
 
 tripsApp.mount('#trips-component');
