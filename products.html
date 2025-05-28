@@ -78,7 +78,7 @@
         <!-- Cards-->
         <div class="col-md-9">
           <div class="row g-4">
-            <div class="col-md-4" v-for="trip in filteredTrips" :key="trip.title"> <!--sortedTrips-->
+            <div class="col-md-4" v-for="trip in sortedTrips" :key="trip.title"> <!--sortedTrips-->
               <div class="card h-100">
                 <img :src="trip.imageUrl" class="card-img-top" :alt="trip.imageAlt">
                 <div class="card-body">
